@@ -50,6 +50,9 @@ double currentPosition = 0.0;
 double previousError = 0.0;
 double integralTerm = 0.0;
 
+TaskHandle_t mainTask;
+TaskHandle_t PIDTask;
+
 
 void encoder_isr() {
   // Reading the current state of encoder A and B
@@ -118,6 +121,18 @@ void setup() {
 
   // Attaching the ISR to encoder A
   attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoder_isr, CHANGE);
+
+
+  //DualCore
+    xTaskCreatePinnedToCore(
+                    PID,   /* Task function. */
+                    "PIDTask",     /* name of task. */
+                    10000,       /* Stack size of task */
+                    NULL,        /* parameter of the task */
+                    1,           /* priority of the task */
+                    &PIDTask,      /* Task handle to keep track of created task */
+                    1);          /* pin task to core 1 */
+    delay(500); 
 }
 
 void loop() {
@@ -235,53 +250,53 @@ void handleDirection() {
   server.send(200, "text/plain", "Direction set to " + direction + "&" + "speed" + String(speedclass));
 }
 
-// void PID()
-// {
-//   while (true) {
-//   // Read current position from the sensor
-//   currentPosition = distanceValue;
+void PID(void * pvParameters)
+{
+  while (true) {
+  // Read current position from the sensor
+  currentPosition = distanceValue;
 
-//   // Calculate error
-//   double error = desiredPosition - currentPosition;
+  // Calculate error
+  double error = desiredPosition - currentPosition;
 
-//   // Calculate PID terms
-//   double proportionalTerm = Kp * error;
-//   integralTerm += Ki * error;
-//   double derivativeTerm = Kd * (error - previousError);
+  // Calculate PID terms
+  double proportionalTerm = Kp * error;
+  integralTerm += Ki * error;
+  double derivativeTerm = Kd * (error - previousError);
 
-//   // Calculate control output
-//   double controlOutput = proportionalTerm + integralTerm + derivativeTerm;
+  // Calculate control output
+  double controlOutput = proportionalTerm + integralTerm + derivativeTerm;
 
-//   // Apply control output to the motor or actuator
-//   applyControlOutput(controlOutput);
+  // Apply control output to the motor or actuator
+  applyControlOutput(controlOutput);
 
-//   // Update variables for next iteration
-//   previousError = error;
+  // Update variables for next iteration
+  previousError = error;
 
-//   // Add some delay between iterations
-//   delay(10);
-// }
-// }
+  // Add some delay between iterations
+  delay(10);
+}
+}
 
 
-// void applyControlOutput(double output)
-// {
-//   if(currentPosition > 0)
-//   {
-//     speedclass = speedclass;
-//   }
+void applyControlOutput(double output)
+{
+  if(currentPosition > 0)
+  {
+    speedclass = speedclass;
+  }
 
-//   else if(currentPosition < 0 )
-//   {
-//    speedclass = -speedclass;
-//   }
+  else if(currentPosition < 0 )
+  {
+   speedclass = -speedclass;
+  }
 
-//   else 
-//   {
-//     speedclass = 0;
-//   }
+  else 
+  {
+    speedclass = 0;
+  }
   
-// }
+}
 
 
 
