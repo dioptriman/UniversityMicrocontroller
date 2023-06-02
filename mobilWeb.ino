@@ -65,7 +65,7 @@ void encoder_isr() {
 }
 
 
-
+// To convert from pulse to centimeter
 float encToDistance(int encoder_value)
 {
   return ((encoder_value / PPR) * CIR);
@@ -188,7 +188,7 @@ void handleRoot() {
   html += "<input type=\"submit\" value=\"Set Direction\">";
   html += "</form>";
   html += "<h2>Encoder Value : </h2>" + String(encoder_value) + "<h2> To Distance : </h2>" + String(distanceValue);
-  html += "<h2>Encoder Value : </h2>" + String(speedclass);
+  html += "<h2>Speed Value : </h2>" + String(speedclass);
   html += "</body></html>";
 
   server.send(200, "text/html", html);
